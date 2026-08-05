@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colaboración en DaVinci Resolve — Guía comparativa (self-hosted vs cloud)</title>
+<meta name="description" content="Comparativa de opciones self-hosted y cloud para editar vídeo en colaboración con DaVinci Resolve: precios, pros, contras y presupuesto real para 2 usuarios y 2 TB.">
+<style>
+  :root{
+    --bg:#0d0e11;
+    --surface:#15161a;
+    --surface-2:#1b1d22;
+    --border:#26292f;
+    --ink:#e9eaed;
+    --muted:#9aa1aa;
+    --faint:#6b7280;
+    --accent:#ff5f2e;
+    --accent-soft:rgba(255,95,46,.12);
+    --good:#4ade80;
+    --bad:#f87171;
+    --warn:#fbbf24;
+    --mono:"SFMono-Regular",ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;
+    --sans:"Avenir Next","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:var(--sans);font-size:16px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ---------- nav ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:var(--bg);border-bottom:1px solid var(--border);
+  }
+  nav .inner{
+    max-width:1080px;margin:0 auto;padding:0 24px;
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    min-height:54px;
+  }
+  nav .brand{
+    font-weight:700;letter-spacing:-.01em;margin-right:auto;
+    display:flex;align-items:center;gap:8px;color:var(--ink);
+  }
+  nav .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+  nav a.tab{
+    color:var(--muted);font-size:13.5px;padding:6px 10px;border-radius:6px;
+  }
+  nav a.tab:hover{color:var(--ink);background:var(--surface-2);text-decoration:none}
+  nav a.tab.active{color:var(--ink);background:var(--surface-2)}
+
+  main{max-width:1080px;margin:0 auto;padding:0 24px 80px}
+
+  /* ---------- header ---------- */
+  header{padding:64px 0 40px;border-bottom:1px solid var(--border);margin-bottom:48px}
+  .kicker{
+    font-family:var(--mono);font-size:12.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:14px;
+  }
+  h1{
+    font-size:clamp(30px,4.5vw,46px);line-height:1.12;letter-spacing:-.02em;
+    font-weight:800;max-width:20ch;margin-bottom:16px;
+  }
+  .lede{color:var(--muted);max-width:64ch;font-size:17px}
+  .facts{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:12px;margin-top:32px;
+  }
+  .fact{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:16px 18px;
+  }
+  .fact .n{
+    font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);display:block;
+  }
+  .fact p{color:var(--muted);font-size:13.5px;margin-top:4px}
+
+  /* ---------- sections ---------- */
+  section{padding:56px 0;border-bottom:1px solid var(--border)}
+  section:last-of-type{border-bottom:none}
+  h2{
+    font-size:clamp(22px,3vw,30px);letter-spacing:-.015em;font-weight:800;
+    margin-bottom:8px;
+  }
+  .sub{color:var(--muted);max-width:70ch;margin-bottom:28px}
+  .tag{
+    display:inline-block;font-family:var(--mono);font-size:11.5px;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--accent);
+    background:var(--accent-soft);border:1px solid rgba(255,95,46,.25);
+    padding:3px 10px;border-radius:999px;margin-bottom:14px;
+  }
+
+  /* ---------- models (real-time vs review) ---------- */
+  .models{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .model{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:22px;
+  }
+  .model h3{font-size:17px;margin-bottom:8px}
+  .model .role{
+    font-family:var(--mono);font-size:12px;color:var(--faint);
+    text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;
+  }
+  .model ul{list-style:none}
+  .model li{color:var(--muted);font-size:14.5px;padding:5px 0 5px 20px;position:relative}
+  .model li::before{content:"›";position:absolute;left:4px;color:var(--accent)}
+  .model.spot{border-color:rgba(255,95,46,.45)}
+  .model.spot h3{color:var(--accent)}
+
+  /* ---------- tables ---------- */
+  .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+  table{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+  thead th{
+    text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--faint);font-weight:600;padding:12px 14px;
+    border-bottom:1px solid var(--border);background:var(--surface);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:13px 14px;border-bottom:1px solid var(--border);vertical-align:top;
+    color:var(--muted);
+  }
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--surface)}
+  td .strong{color:var(--ink);font-weight:600}
+  .price{font-family:var(--mono);color:var(--ink);white-space:nowrap;font-size:13.5px}
+  .pill{
+    display:inline-block;font-size:11.5px;font-weight:600;padding:2px 9px;border-radius:999px;
+    white-space:nowrap;
+  }
+  .pill.yes{background:rgba(74,222,128,.12);color:var(--good)}
+  .pill.no{background:rgba(248,113,113,.12);color:var(--bad)}
+  .pill.part{background:rgba(251,191,36,.12);color:var(--warn)}
+  .pill.once{background:rgba(255,95,46,.14);color:var(--accent)}
+  .pill.sub{background:rgba(148,163,184,.14);color:#cbd5e1}
+
+  /* ---------- option cards ---------- */
+  .group-label{
+    font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--faint);margin:40px 0 16px;display:flex;align-items:center;gap:12px;
+  }
+  .group-label::after{content:"";flex:1;height:1px;background:var(--border)}
+  .options{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+  .opt{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    display:flex;flex-direction:column;
+  }
+  .opt .head{padding:20px 22px 0}
+  .opt h3{font-size:18px;letter-spacing:-.01em}
+  .opt .what{color:var(--muted);font-size:13.5px;margin-top:6px}
+  .opt .bigprice{
+    font-family:var(--mono);font-size:24px;font-weight:700;color:var(--accent);
+    margin-top:14px;letter-spacing:-.02em;
+  }
+  .opt .bigprice .per{font-size:13px;color:var(--faint);font-weight:400}
+  .opt .pricebreak{
+    font-size:12.5px;color:var(--muted);margin-top:4px;padding-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+  .opt .body{padding:16px 22px 20px}
+  .opt .bloc{margin-bottom:14px}
+  .opt .bloc:last-child{margin-bottom:0}
+  .opt .bloc h4{
+    font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px;
+  }
+  .opt .bloc.pros h4{color:var(--good)}
+  .opt .bloc.cons h4{color:var(--bad)}
+  .opt ul{list-style:none}
+  .opt li{font-size:13.5px;color:var(--muted);padding:3.5px 0 3.5px 18px;position:relative}
+  .opt .pros li::before{content:"+";position:absolute;left:2px;color:var(--good);font-family:var(--mono);font-weight:700}
+  .opt .cons li::before{content:"−";position:absolute;left:2px;color:var(--bad);font-family:var(--mono);font-weight:700}
+  .opt .src{margin-top:14px;font-size:12.5px}
+  .opt.reco{border-color:rgba(255,95,46,.5)}
+  .opt .ribbon{
+    position:absolute;margin:-20px 0 0 -22px;display:none;
+  }
+  .opt.reco .ribbon{
+    display:inline-block;background:var(--accent);color:#120a04;
+    font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    padding:3px 10px;border-radius:0 0 8px 0;
+  }
+
+  /* ---------- chart ---------- */
+  .chart-box{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:22px;margin-bottom:18px;
+  }
+  .chart-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .chart-head h3{font-size:16px}
+  .toggle{
+    display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;
+  }
+  .toggle button{
+    background:var(--surface-2);color:var(--muted);border:none;padding:7px 14px;
+    font-family:var(--sans);font-size:13px;cursor:pointer;
+  }
+  .toggle button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  .chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0 10px;font-size:12.5px;color:var(--muted)}
+  .chart-legend .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  #chart svg{width:100%;height:auto;display:block}
+  .chart-note{font-size:12.5px;color:var(--faint);margin-top:8px}
+  .chart-fallback{color:var(--muted);font-size:14px}
+  .cum{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:18px}
+  .cum .cell{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+  .cum .cell .k{font-size:12.5px;color:var(--faint)}
+  .cum .cell .v{font-family:var(--mono);font-size:17px;font-weight:700;margin-top:2px}
+  .cum .cell.win .v{color:var(--good)}
+  .cum .cell.lose .v{color:var(--bad)}
+
+  /* ---------- bom ---------- */
+  .bom{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:26px}
+  .bom-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+  .bom-item .what{font-size:13px;color:var(--muted)}
+  .bom-item .model-name{font-size:15px;font-weight:700;margin:2px 0 6px}
+  .bom-item .cost{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--ink)}
+  .bom-item .cost.free{color:var(--good)}
+  .bom-item small{color:var(--faint);font-size:12px}
+  .total{
+    background:var(--accent-soft);border:1px solid rgba(255,95,46,.4);
+    border-radius:var(--radius);padding:18px 22px;display:flex;
+    justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .total .lbl{font-size:14px;color:var(--ink);font-weight:600}
+  .total .amt{font-family:var(--mono);font-size:26px;font-weight:800;color:var(--accent)}
+  .total small{display:block;font-size:12px;color:var(--faint);font-weight:400}
+
+  /* ---------- alternatives ---------- */
+  .alts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+  .alt{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+  .alt h4{font-size:15px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .alt h4 .ap{font-family:var(--mono);font-size:12.5px;color:var(--accent);white-space:nowrap}
+  .alt p{font-size:13.5px;color:var(--muted);margin-top:6px}
+  .alt .for{font-size:12px;color:var(--faint);margin-top:8px}
+
+  /* ---------- recommendation ---------- */
+  .recs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .rec{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;display:flex;flex-direction:column}
+  .rec .who{font-family:var(--mono);font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint)}
+  .rec h3{font-size:17px;margin:6px 0 10px}
+  .rec p{font-size:13.5px;color:var(--muted);flex:1}
+  .rec .pick{
+    margin-top:14px;font-size:13.5px;font-weight:700;color:var(--accent);
+    border-top:1px solid var(--border);padding-top:12px;
+  }
+  .rec.winner{border-color:rgba(255,95,46,.5)}
+  .rec.winner .pick{color:var(--ink)}
+  .rec.winner .pick span{color:var(--accent)}
+
+  /* ---------- faq ---------- */
+  details{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    margin-bottom:10px;
+  }
+  summary{
+    cursor:pointer;padding:16px 20px;font-weight:600;font-size:15px;list-style:none;
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-family:var(--mono);color:var(--accent);font-size:18px}
+  details[open] summary::after{content:"−"}
+  details .a{padding:0 20px 18px;color:var(--muted);font-size:14px}
+
+  /* ---------- sources / footer ---------- */
+  .sources{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px}
+  .sources a{display:block;font-family:var(--mono);font-size:12.5px;color:var(--muted);padding:5px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sources a:hover{color:var(--accent)}
+  footer{
+    max-width:1080px;margin:0 auto;padding:28px 24px 60px;border-top:1px solid var(--border);
+    color:var(--faint);font-size:12.5px;line-height:1.7;
+  }
+  @media (max-width:700px){
+    .models{grid-template-columns:1fr}
+    header{padding:44px 0 32px}
+    section{padding:40px 0}
+  }
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <span class="brand"><span class="dot"></span>Colaboración en Resolve</span>
+    <a class="tab" href="#contexto">Contexto</a>
+    <a class="tab" href="#comparativa">Comparativa</a>
+    <a class="tab" href="#opciones">Opciones</a>
+    <a class="tab" href="#coste">Coste</a>
+    <a class="tab" href="#presupuesto">Presupuesto 2TB</a>
+    <a class="tab" href="#alternativas">Alternativas</a>
+    <a class="tab" href="#recomendacion">Recomendación</a>
+    <a class="tab" href="#faq">FAQ</a>
+    <a class="tab" href="#fuentes">Fuentes</a>
+  </div>
+</nav>
+
+<main>
+
+<header>
+  <div class="kicker">Estudio comparativo · Datos verificados · Ago 2026</div>
+  <h1>Editar vídeo en equipo con DaVinci Resolve: self-hosted vs cloud</h1>
+  <p class="lede">Un youtuber + un editor externo, ~2&nbsp;TB de material, mismo proyecto. Todas las vías posibles para colaborar con DaVinci Resolve — la oficial sobre NAS propio, plataformas self-hosted y los servicios cloud comerciales — con precios reales, pros, contras y coste a 3 años.</p>
+  <div class="facts">
+    <div class="fact"><span class="n">$295</span><p>Resolve Studio por usuario (one-time) — la colaboración exige Studio en <b>todos</b> los equipos. Alternativa: alquiler ~$30/mes.</p></div>
+    <div class="fact"><span class="n">2 modelos</span><p>Edición real-time del mismo proyecto (bin locking) ≠ review/approval (comentarios sobre renders). No son intercambiables.</p></div>
+    <div class="fact"><span class="n">~$945</span><p>Coste one-time de la vía self-hosted completa (NAS 2TB + 2 licencias Studio). Frente al cloud con Studio alquilado (~$65/mes) se amortiza en el mes 14.</p></div>
+  </div>
+</header>
+
+<section id="contexto">
+  <span class="tag">Lo primero</span>
+  <h2>Dos formas de "colaborar", dos problemas distintos</h2>
+  <p class="sub">Antes de elegir plataforma hay que decidir qué se quiere. La mayoría de servicios cloud (Frame.io, Kollaborate, PostLab) <b>no</b> permiten editar a la vez: gestionan versiones y feedback. Editar simultáneamente el mismo timeline solo lo hace la colaboración nativa de Resolve (Studio + almacenamiento compartido).</p>
+  <div class="models">
+    <div class="model spot">
+      <div class="role">Modelo A · Edición real-time</div>
+      <h3>Varios editores, el mismo proyecto, a la vez</h3>
+      <ul>
+        <li>Bin locking: cada uno edita bins distintos sin pisarse.</li>
+        <li>Requiere <b>Resolve Studio por usuario</b> ($295 c/u o ~$30/mes).</li>
+        <li>Requiere almacenamiento compartido con locking correcto: NAS (SMB), SAN o Blackmagic Cloud Store.</li>
+        <li>El proyecto vive en un Project Server (PostgreSQL) — gratis de Blackmagic, corre en el NAS.</li>
+        <li>Con acceso remoto (Tailscale/VPN) el editor externo entra como si estuviera en LAN.</li>
+      </ul>
+    </div>
+    <div class="model">
+      <div class="role">Modelo B · Review &amp; approval</div>
+      <h3>Subir renders, comentar, aprobar, versionar</h3>
+      <ul>
+        <li>Se comparte el render/proxy; el otro comenta frame a frame en el navegador.</li>
+        <li>No requiere Resolve Studio en quien solo revisa — solo en quien edita.</li>
+        <li>Frame.io (nube) y Kollaborate (self-hosted) son los referentes.</li>
+        <li>PostLab aporta además versionado y locking del proyecto de edición sobre tu propio storage.</li>
+        <li>Es el flujo "cliente-editor"; no sustituye al Modelo A.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="comparativa">
+  <span class="tag">De un vistazo</span>
+  <h2>Tabla maestra comparativa</h2>
+  <p class="sub">Precios en USD de agosto 2026, verificados en las páginas oficiales. "Edición real-time" = ¿pueden dos personas editar el mismo proyecto Resolve simultáneamente?</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Opción</th>
+          <th>Modelo</th>
+          <th>Precio</th>
+          <th>Edición real-time</th>
+          <th>Storage</th>
+          <th>Usuarios</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="strong">NAS + Resolve Studio + Project Server</span></td>
+          <td><span class="pill once">One-time</span></td>
+          <td class="price">~$945 (2TB, 2 users)</td>
+          <td><span class="pill yes">Sí</span></td>
+          <td>2 TB útil (RAID 1) · ampliable</td>
+          <td>2 (sin límite real)</td>
+        </tr>
+        <tr>
+          <td><span class="strong">Blackmagic Cloud</span></td>
+          <td><span class="pill sub">Suscripción</span></td>
+          <td class="price">$5/mes librería + $295/seat</td>
+          <td><span class="pill yes">Sí</span></td>
+          <td>2 GB gratis · proxies</td>
+          <td>Hasta 10 por librería</td>
+        </tr>
+        <tr>
+          <td><span class="strong">LucidLink + Studio</span></td>
+          <td><span class="pill sub">Suscripción</span></td>
+          <td class="price">$80/mes TB (mín 1 TB) + $295/seat</td>
+          <td><span class="pill yes">Sí</span></td>
+          <td>Cloud, 1 TB mínimo</td>
+          <td>Ilimitados</td>
+        </tr>
+        <tr>
+          <td><span class="strong">Kollaborate Server</span></td>
+          <td><span class="pill once">Licencia + hardware</span></td>
+          <td class="price">$159 (5 users) + mant. $45/año</td>
+          <td><span class="pill no">No</span></td>
+          <td>Tu storage (sin límites)</td>
+          <td>5–ilimitado</td>
+        </tr>
+        <tr>
+          <td><span class="strong">PostLab (Hedge)</span></td>
+          <td><span class="pill sub">Anual</span></td>
+          <td class="price">$129–189/año</td>
+          <td><span class="pill part">Locking por proyecto</span></td>
+          <td>BYO (NAS, Dropbox, LucidLink…)</td>
+          <td>1 activación, licencias compartidas en Pro</td>
+        </tr>
+        <tr>
+          <td><span class="strong">Frame.io</span></td>
+          <td><span class="pill sub">Suscripción</span></td>
+          <td class="price">Free · $15 · $25/miembro/mes</td>
+          <td><span class="pill no">No</span></td>
+          <td>2 GB → 2–3 TB</td>
+          <td>2 → 5 → 15</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="opciones">
+  <span class="tag">En detalle</span>
+  <h2>Las seis opciones, con pros y contras</h2>
+  <p class="sub">Cada ficha incluye el precio real de agosto 2026 y su fuente.</p>
+
+  <div class="group-label">Self-hosted · tu hardware, tus datos</div>
+  <div class="options">
+
+    <div class="opt reco">
+      <div class="head">
+        <span class="ribbon">Recomendada</span>
+        <h3>NAS + Resolve Studio + Project Server</h3>
+        <p class="what">La colaboración nativa de DaVinci sobre tu propio almacenamiento. El editor remoto entra por Tailscale/WireGuard (gratis).</p>
+        <div class="bigprice">~$945 <span class="per">one-time · 2TB · 2 usuarios</span></div>
+        <div class="pricebreak">2× Studio $295 · NAS QNAP TS-233 ~$155 · 2× IronWolf 2TB ~$200 · Project Server y Tailscale: $0</div>
+      </div>
+      <div class="body">
+        <div class="bloc pros"><h4>Pros</h4><ul>
+          <li>Edición real-time de verdad: bin locking, mismos bins compartidos.</li>
+          <li>Coste cerrado: pagas una vez, es tuyo para siempre.</li>
+          <li>Sin límite de usuarios ni cuotas de almacenamiento.</li>
+          <li>Sin dependencia de nube: los rushes no salen de casa.</li>
+          <li>Project Server (PostgreSQL) es gratis, corre en Docker en el propio NAS.</li>
+        </ul></div>
+        <div class="bloc cons"><h4>Contras</h4><ul>
+          <li>Montaje inicial: RAID, SMB con locking, Tailscale, proxies.</li>
+          <li>Rendimiento por red: con 4K conviene generar proxies.</li>
+          <li>Tú eres el soporte: discos, backups, actualizaciones.</li>
+          <li>Un NAS ARM va justo con 2 editores 4K simultáneos.</li>
+        </ul></div>
+        <div class="src">Fuente: <a href="https://www.blackmagicdesign.com/products/davinciresolve" target="_blank" rel="noopener">blackmagicdesign.com</a></div>
+      </div>
+    </div>
+
+    <div class="opt">
+      <div class="head">
+        <h3>Kollaborate Server</h3>
+        <p class="what">Plataforma self-hosted de review/approval + tareas + versionado (Digital Rebellion). Corre en Docker sobre tu propio storage, sin límites.</p>
+        <div class="bigprice">$159 <span class="per">Personal · 5 usuarios</span></div>
+        <div class="pricebreak">Small Biz $239 (10) · Business $379 (25) · Production $699 (40) · Unlimited $1.899 · Mantenimiento anual $45–379 tras el 1er año · Encoder add-on $99</div>
+      </div>
+      <div class="body">
+        <div class="bloc pros"><h4>Pros</h4><ul>
+          <li>Licencia perpetua sobre tu infraestructura — datos 100% en casa.</li>
+          <li>Storage ilimitado (el que pongas tú).</li>
+          <li>Permisos por departamento, flujos de aprobación, tareas.</li>
+          <li>Precio bajo comparado con SaaS de la misma categoría.</li>
+        </ul></div>
+        <div class="bloc cons"><h4>Contras</h4><ul>
+          <li>No es edición real-time: es revisión y feedback.</li>
+          <li>Hay que montar y mantener Docker/PHP/MariaDB/Redis.</li>
+          <li>UI más técnica y menos pulida que Frame.io.</li>
+        </ul></div>
+        <div class="src">Fuente: <a href="https://www.kollaborate.tv/server" target="_blank" rel="noopener">kollaborate.tv/server</a></div>
+      </div>
+    </div>
+
+    <div class="opt">
+      <div class="head">
+        <h3>PostLab (Hedge)</h3>
+        <p class="what">Versionado automático y locking de proyecto para Resolve, Premiere, FCP y Avid. "Serverless": tú pones el storage (NAS, Dropbox, Synology Drive, LucidLink).</p>
+        <div class="bigprice">$129–189 <span class="per">al año</span></div>
+        <div class="pricebreak">$29 (1 mes) · $129/año (1 activación) · $189/año Pro: soporte LucidLink, Event Locking, licencias compartidas</div>
+      </div>
+      <div class="body">
+        <div class="bloc pros"><h4>Pros</h4><ul>
+          <li>Historial de versiones de cada proyecto — "time machine" del edit.</li>
+          <li>Elimina el relinking: media vinculada una vez y queda vinculada.</li>
+          <li>Funciona con tu nube o NAS actual, sin servidor propio.</li>
+          <li>Precio plano anual, sin coste por usuario.</li>
+        </ul></div>
+        <div class="bloc cons"><h4>Contras</h4><ul>
+          <li>Locking por proyecto (check-out), no edición simultánea de bins.</li>
+          <li>Solo macOS por ahora.</li>
+          <li>El combo real (PostLab + LucidLink) sale caro: ~$189/año + $80–160/mes.</li>
+        </ul></div>
+        <div class="src">Fuente: <a href="https://hedge.co/products/postlab" target="_blank" rel="noopener">hedge.co/products/postlab</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="group-label">Cloud comercial · cero mantenimiento, pago mensual</div>
+  <div class="options">
+
+    <div class="opt">
+      <div class="head">
+        <h3>Blackmagic Cloud</h3>
+        <p class="what">La nube oficial de Blackmagic: sincroniza librerías y proyectos de Resolve entre equipos, en cualquier parte del mundo. Media vía proxies o hardware Cloud Store.</p>
+        <div class="bigprice">$5/mes <span class="per">por librería + Studio por user</span></div>
+        <div class="pricebreak">Hasta 10 usuarios/librería · 2 GB incluidos · Studio $295 o ~$30/mes · Hardware: Cloud Dock 2 $649 · Dock 4 $1.575 · Cloud Store 80TB $53.895</div>
+      </div>
+      <div class="body">
+        <div class="bloc pros"><h4>Pros</h4><ul>
+          <li>Edición real-time multi-sitio sin montar nada: es la vía oficial.</li>
+          <li>Integración total con Resolve (es el mismo fabricante).</li>
+          <li>Alquiler de Studio por ~$30/mes disponible en la misma plataforma.</li>
+          <li>Escala: de 2 a 10 usuarios por librería.</li>
+        </ul></div>
+        <div class="bloc cons"><h4>Contras</h4><ul>
+          <li>2 GB gratis se quedan cortos para media real: necesitas proxies o Cloud Store (hardware caro).</li>
+          <li>El coste por proyecto se dispara con varias librerías.</li>
+          <li>Dependes de la infraestructura de Blackmagic.</li>
+        </ul></div>
+        <div class="src">Fuente: <a href="https://www.blackmagicdesign.com/products/davinciresolve/collaboration" target="_blank" rel="noopener">blackmagicdesign.com · collaboration</a></div>
+      </div>
+    </div>
+
+    <div class="opt">
+      <div class="head">
+        <h3>LucidLink</h3>
+        <p class="what">Sistema de ficheros en la nube que se monta como disco local: los dos editores trabajan sobre el mismo volumen como si fuera un NAS, con locking real. El estándar de facto para edición remota.</p>
+        <div class="bigprice">$80–160/mes <span class="per">por storage (1–2 TB) + Studio</span></div>
+        <div class="pricebreak">Starter $7/100GB/mes · Business $8/100GB/mes (mínimo 1 TB ≈ $80/mes; 2 TB ≈ $160/mes) · Enterprise a medida</div>
+      </div>
+      <div class="body">
+        <div class="bloc pros"><h4>Pros</h4><ul>
+          <li>Edición real-time remota sin NAS físico ni VPN: montas el volumen y listo.</li>
+          <li>Locking SMB-compatible y caché local por usuario.</li>
+          <li>Escala instantánea de storage; cero hardware que mantener.</li>
+          <li>Compatible con PostLab y con la colaboración nativa de Resolve.</li>
+        </ul></div>
+        <div class="bloc cons"><h4>Contras</h4><ul>
+          <li>El más caro a medio plazo: a 2 TB son ~$160/mes para siempre.</li>
+          <li>Dependes de latencia y ancho de banda de subida del youtuber.</li>
+          <li>Los precios han subido fuerte (duplicados respecto a 2023).</li>
+        </ul></div>
+        <div class="src">Fuente: <a href="https://www.lucidlink.com/pricing" target="_blank" rel="noopener">lucidlink.com/pricing</a></div>
+      </div>
+    </div>
+
+    <div class="opt">
+      <div class="head">
+        <h3>Frame.io (Adobe)</h3>
+        <p class="what">El estándar de review/approval: subes el render, el otro comenta frame a frame en el navegador, sin instalar nada. Ideal para el flujo "el editor envía, el youtuber aprueba".</p>
+        <div class="bigprice">$15 <span class="per">o $25 por miembro/mes</span></div>
+        <div class="pricebreak">Free: 2 miembros, 2 GB · Pro $15: 5 miembros, 2 TB+2 TB/miembro · Team $25: 15 miembros, 3 TB+ · Enterprise a medida</div>
+      </div>
+      <div class="body">
+        <div class="bloc pros"><h4>Pros</h4><ul>
+          <li>Máxima facilidad: el que revisa solo necesita un navegador.</li>
+          <li>Comentarios frame-accurate, versiones, aprobaciones, subtítulos.</li>
+          <li>Plan Free real para empezar; Pro para 2 personas cuesta $30/mes.</li>
+          <li>Estándar de la industria, apps iOS/tvOS, C2C desde cámara.</li>
+        </ul></div>
+        <div class="bloc cons"><h4>Contras</h4><ul>
+          <li>No permite editar a la vez: es solo revisión y aprobación.</li>
+          <li>Sin panel nativo para DaVinci Resolve (sí para Premiere/FCP).</li>
+          <li>Storage limitado por plan; el editor sigue necesitando su propio flujo de media.</li>
+        </ul></div>
+        <div class="src">Fuente: <a href="https://frame.io/pricing" target="_blank" rel="noopener">frame.io/pricing</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="coste">
+  <span class="tag">Dinero a medio plazo</span>
+  <h2>Coste acumulado a 36 meses (2 usuarios, 2 TB)</h2>
+  <p class="sub">Comparación honesta: incluye hardware, licencias y cuotas. Frame.io se incluye solo como referencia de review (no permite edición real-time).</p>
+
+  <div class="chart-box">
+    <div class="chart-head">
+      <h3>Coste total acumulado, mes a mes</h3>
+      <div class="toggle" id="toggle" role="group" aria-label="Modalidad de licencia Studio">
+        <button id="btn-buy" class="on" type="button">Comprar Studio ($295)</button>
+        <button id="btn-rent" type="button">Alquilar Studio ($30/mes)</button>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <span><span class="sw" style="background:#ff5f2e"></span>NAS (self-hosted)</span>
+      <span><span class="sw" style="background:#4ade80"></span>Blackmagic Cloud</span>
+      <span><span class="sw" style="background:#60a5fa"></span>LucidLink</span>
+      <span><span class="sw" style="background:#c4b5fd"></span>Frame.io (solo review)</span>
+    </div>
+    <div id="chart" aria-label="Gráfico de coste acumulado">
+      <p class="chart-fallback">Gráfico no disponible sin JavaScript. Tabla de costes a 36 meses: NAS ~$945 (compra) o ~$2.160 (alquiler) · Blackmagic Cloud $2.340 · LucidLink $6.350 · Frame.io $1.080.</p>
+    </div>
+    <p class="chart-note">Escenarios con 2 usuarios y 2 TB de media. NAS: $945 iniciales + $0/mes. Blackmagic Cloud: $5/mes librería + Studio (compra o alquiler). LucidLink: $160/mes (2 TB) + Studio comprado. Frame.io: $30/mes (2× Pro), sin edición real-time.</p>
+  </div>
+
+  <div class="cum">
+    <div class="cell win" id="cum-nas"><div class="k">NAS · 36 meses (compra Studio)</div><div class="v">$945</div></div>
+    <div class="cell" id="cum-bmc"><div class="k">Blackmagic Cloud · 36 meses (alquiler)</div><div class="v">$2.340</div></div>
+    <div class="cell lose" id="cum-lucid"><div class="k">LucidLink · 36 meses</div><div class="v">$6.350</div></div>
+    <div class="cell" id="cum-frame"><div class="k">Frame.io · 36 meses (solo review)</div><div class="v">$1.080</div></div>
+  </div>
+  <p class="chart-note">Nota de honestidad: Blackmagic Cloud a $5/mes incluye solo 2 GB — no caben 2 TB de media real sin proxies limitados o hardware Cloud Store (desde $649). Por eso su línea no se marca como ganadora y no es comparable 1:1 en almacenamiento. El resaltado verde/rojo compara solo las dos vías con storage real de 2 TB: NAS vs LucidLink.</p>
+</section>
+
+<section id="presupuesto">
+  <span class="tag">Lista de la compra</span>
+  <h2>Presupuesto self-hosted: 2 TB útiles, 2 usuarios</h2>
+  <p class="sub">Precios de mercado de agosto 2026. Los discos NAS subieron fuerte a finales de 2025, así que hay dos configuraciones posibles.</p>
+
+  <div class="bom">
+    <div class="bom-item">
+      <div class="what">NAS 2 bahías · 2.5GbE · Docker</div>
+      <div class="model-name">QNAP TS-233</div>
+      <div class="cost">~$155</div>
+      <small>Alternativa: Synology DS223 ~$250–300 (más caro, DSM más pulido). El DS223j (~$160) NO corre Docker: descartado.</small>
+    </div>
+    <div class="bom-item">
+      <div class="what">Discos NAS · RAID 1 (espejo)</div>
+      <div class="model-name">2× Seagate IronWolf 2TB</div>
+      <div class="cost">~$200</div>
+      <small>2 TB útiles. Variante con margen: 2× 4TB (~$380) → 4 TB útiles por ~$180 más.</small>
+    </div>
+    <div class="bom-item">
+      <div class="what">Licencias de edición</div>
+      <div class="model-name">2× DaVinci Resolve Studio</div>
+      <div class="cost">$590</div>
+      <small>Obligatorias para colaborar. Alternativa: alquiler ~$30/mes cada una.</small>
+    </div>
+    <div class="bom-item">
+      <div class="what">Software de infraestructura</div>
+      <div class="model-name">Project Server + Tailscale</div>
+      <div class="cost free">$0</div>
+      <small>Project Server (PostgreSQL, gratis de Blackmagic) en Docker del NAS. Tailscale para que el editor externo entre como si estuviera en LAN.</small>
+    </div>
+  </div>
+
+  <div class="total">
+    <div class="lbl">Total one-time (2 TB útiles, 2 usuarios)
+      <small>Sin costes mensuales. Mantenimiento futuro: solo discos si fallan. Con Studio en alquiler: $60/mes.</small>
+    </div>
+    <div class="amt">~$945</div>
+  </div>
+</section>
+
+<section id="alternativas">
+  <span class="tag">Más caminos</span>
+  <h2>Alternativas y variantes</h2>
+  <p class="sub">Para redondear la foto: otras piezas de hardware, SaaS relacionados y vías DIY que complementan o sustituyen a las anteriores.</p>
+  <div class="alts">
+    <div class="alt">
+      <h4>Synology DS223 <span class="ap">~$250–300</span></h4>
+      <p>La alternativa premium al QNAP: DSM es más amigable, con paquetes oficiales y Docker. Misma arquitectura de la solución: SMB + Project Server + Tailscale.</p>
+      <div class="for">Para quien prefiere UX pulida y no le importa pagar ~$100 más.</div>
+    </div>
+    <div class="alt">
+      <h4>QNAP TS-264 / TS-464 <span class="ap">~$400–550</span></h4>
+      <p>NAS x86 de 2–4 bahías con CPU Intel: transcode 4K y 3–4 editores simultáneos sin sudar. Misma receta, más músculo.</p>
+      <div class="for">Para crecer a 3+ editores o editar 4K sin proxies.</div>
+    </div>
+    <div class="alt">
+      <h4>Blackmagic Cloud Store <span class="ap">$649 → $53.895</span></h4>
+      <p>Almacenamiento propio de Blackmagic con sync a la nube: Dock 2 $649, Dock 4 $1.575, Cloud Store 80TB $53.895. La vía "oficial" híbrida (local + nube).</p>
+      <div class="for">Producciones que quieren local y nube a la vez; overkill para un youtuber.</div>
+    </div>
+    <div class="alt">
+      <h4>TrueNAS / servidor DIY <span class="ap">~$500–900</span></h4>
+      <p>PC viejo o mini-PC + TrueNAS Scale: ZFS, SMB con locking, Nextcloud, Project Server en Docker. Más potente y más currado de montar.</p>
+      <div class="for">Si sobra hardware y sobra tiempo.</div>
+    </div>
+    <div class="alt">
+      <h4>Kollaborate Cloud (SaaS) <span class="ap">$7–25/mes</span></h4>
+      <p>La versión alojada de Kollaborate: Individual desde $7/mes ($5 anual) y Team desde $25/mes (5 miembros, 60 GB). Mismas funciones sin montar nada.</p>
+      <div class="for">Cuando quieres Kollaborate sin el servidor.</div>
+    </div>
+    <div class="alt">
+      <h4>Resilio Sync / Syncthing <span class="ap">Free–$59</span></h4>
+      <p>Sincronización P2P de carpetas entre los dos equipos (uno a uno). No da locking ni versionado: solo mueve archivos. Probar con binarios pequeños.</p>
+      <div class="for">Casos muy sencillos con pocos archivos y paciencia.</div>
+    </div>
+    <div class="alt">
+      <h4>Splice (Hedge) <span class="ap">$15–25/mes</span></h4>
+      <p>La herramienta hermana de PostLab para revisión de audio: el youtuber comenta la música/SFX mientras el editor trabaja. Complementa, no sustituye.</p>
+      <div class="for">Youtubers que cuidan el audio y quieren feedback del sonido.</div>
+    </div>
+    <div class="alt">
+      <h4>Moxion / Iconik <span class="ap">Enterprise</span></h4>
+      <p>Review y MAM (media asset management) de nivel estudio con precios a medida. Iconik además indexa y busca el material de forma automática.</p>
+      <div class="for">Estudios; no tiene sentido para 2 personas.</div>
+    </div>
+  </div>
+</section>
+
+<section id="recomendacion">
+  <span class="tag">Veredicto</span>
+  <h2>Qué elegir según el caso</h2>
+  <p class="sub">Con 2 personas (youtuber + editor externo) y 2 TB de material, la decisión se reduce a una pregunta: ¿queréis editar el mismo proyecto a la vez, o solo pasaros renders para comentar?</p>
+  <div class="recs">
+    <div class="rec winner">
+      <div class="who">Caso 1 · Editar a la vez</div>
+      <h3>NAS + 2× Studio + Tailscale</h3>
+      <p>Es la única vía que da edición simultánea real con coste cerrado. El editor externo entra por Tailscale como si estuviera en tu salón. A 2 TB amortiza frente a Blackmagic Cloud (con Studio alquilado) en el mes 14, y frente a LucidLink en el mes 3.</p>
+      <div class="pick"><span>~$945 one-time</span> · y a editar</div>
+    </div>
+    <div class="rec">
+      <div class="who">Caso 2 · Solo feedback y versiones</div>
+      <h3>Frame.io Pro o Kollaborate</h3>
+      <p>Si cada uno edita en su equipo y solo necesitáis comentar renders: Frame.io Pro a $30/mes (2 usuarios) es lo más cómodo; Kollaborate Server $159 si queréis los datos en casa.</p>
+      <div class="pick"><span>$30/mes</span> o <span>$159 one-time</span></div>
+    </div>
+    <div class="rec">
+      <div class="who">Caso 3 · Cero infraestructura</div>
+      <h3>Blackmagic Cloud + alquiler de Studio</h3>
+      <p>Nada que montar ni mantener: $65/mes (librería $5 + 2× Studio $30). El material viaja como proxies. Aceptable si el canal ya paga esa cuota con creces.</p>
+      <div class="pick"><span>~$65/mes</span> · todo en la nube oficial</div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <span class="tag">Dudas frecuentes</span>
+  <h2>FAQ</h2>
+
+  <details>
+    <summary>¿Se puede colaborar con la versión gratuita de Resolve?</summary>
+    <div class="a">No. La colaboración multi-usuario (bins compartidos, Project Server, Blackmagic Cloud) requiere Resolve Studio en <b>todos</b> los equipos que editan. Un solo editor con la free rompe el proyecto compartido. La free solo sirve para revisar .drp individuales.</div>
+  </details>
+  <details>
+    <summary>¿SMB sobre NAS vale para Resolve colaborativo?</summary>
+    <div class="a">Sí, es la vía documentada por Blackmagic junto con NFS y Blackmagic Cloud Store. Requisitos: SMB con locking correcto (Synology/QNAP lo hacen bien por defecto) y puerto 445 accesible. Para 4K se recomienda generar proxies (Resolve lo hace automático) o 2.5GbE/10GbE.</div>
+  </details>
+  <details>
+    <summary>¿Cómo entra el editor externo al NAS sin abrir puertos?</summary>
+    <div class="a">Con <b>Tailscale</b> (gratis hasta 100 dispositivos) o WireGuard: instalas el agente en el NAS y en el equipo del editor, y queda una red privada cifrada entre ambos sin reenvío de puertos ni IP pública. Es la pieza que hace viable la opción self-hosted con un tercero.</div>
+  </details>
+  <details>
+    <summary>¿Qué pasa si se me muere un disco?</summary>
+    <div class="a">Con RAID 1 (espejo) el NAS sigue sirviendo con el disco sano; cambias el dañado por otro de igual tamaño y reconstruye solo. Lo que no da RAID 1 es protección contra borrados: conviene un backup externo (otro disco o copia a la nube de los proyectos terminados) del que también es responsable el NAS.</div>
+  </details>
+  <details>
+    <summary>¿Frame.io sirve para editar con Resolve?</summary>
+    <div class="a">No para editar: es revisión y aprobación. Además no tiene panel nativo de Resolve (sí de Premiere y FCP). El flujo típico: exportas el render, lo subes, el youtuber comenta frame a frame y lo aprueba; los cambios los hace el editor en su equipo.</div>
+  </details>
+  <details>
+    <summary>¿Por qué LucidLink es tan caro a 2 TB?</summary>
+    <div class="a">Su modelo es por capacidad: $8/100GB al mes (Business) con un mínimo de 1 TB. A 2 TB son ~$160/mes ≈ $1.920/año — más del doble que comprar el NAS entero. Es la opción más cómoda (cero hardware) pero la menos rentable a partir de ~1 TB sostenido.</div>
+  </details>
+  <details>
+    <summary>¿Y si en el futuro somos 3 o 4 editores?</summary>
+    <div class="a">La vía NAS escala sin coste adicional de licencia de colaboración (solo +$295 por Studio extra) — basta un NAS con más músculo (TS-264/TS-464 o TrueNAS). Blackmagic Cloud aguanta hasta 10 usuarios por librería a $5/mes. LucidLink cobra por storage, no por usuario.</div>
+  </details>
+</section>
+
+<section id="fuentes">
+  <span class="tag">Verificación</span>
+  <h2>Fuentes consultadas</h2>
+  <p class="sub">Todos los precios verificados directamente en las páginas oficiales el 5 de agosto de 2026. Los precios de hardware son precios de mercado orientativos (Amazon/tiendas), que varían por región y ofertas.</p>
+  <div class="sources">
+    <a href="https://www.blackmagicdesign.com/products/davinciresolve" target="_blank" rel="noopener">blackmagicdesign.com/products/davinciresolve — Studio $295</a>
+    <a href="https://www.blackmagicdesign.com/products/davinciresolve/collaboration" target="_blank" rel="noopener">blackmagicdesign.com — Collaboration / Blackmagic Cloud</a>
+    <a href="https://www.blackmagicdesign.com/products/blackmagiccloudstore" target="_blank" rel="noopener">blackmagicdesign.com/products/blackmagiccloudstore — Cloud Store hardware</a>
+    <a href="https://forum.blackmagicdesign.com/viewtopic.php?f=21&t=165876" target="_blank" rel="noopener">Foro Blackmagic — Blackmagic Cloud: $5/mes por librería, 10 usuarios</a>
+    <a href="https://frame.io/pricing" target="_blank" rel="noopener">frame.io/pricing — Free / Pro $15 / Team $25</a>
+    <a href="https://www.kollaborate.tv/server" target="_blank" rel="noopener">kollaborate.tv/server — licencias y mantenimiento</a>
+    <a href="https://hedge.co/products/postlab" target="_blank" rel="noopener">hedge.co/products/postlab — $29/$129/$189</a>
+    <a href="https://www.lucidlink.com/pricing" target="_blank" rel="noopener">lucidlink.com/pricing — $7–8/100GB/mes, mín 1TB</a>
+    <a href="https://www.qnap.com/en-us/product/ts-233" target="_blank" rel="noopener">qnap.com — TS-233</a>
+    <a href="https://www.xda-developers.com/lowest-price-for-qnap-ts-233-deal/" target="_blank" rel="noopener">XDA — TS-233 a ~$152</a>
+    <a href="https://www.storagereview.com/review/qnap-ts-233-2-bay-nas-review/" target="_blank" rel="noopener">StorageReview — review TS-233</a>
+    <a href="https://www.amazon.com/Seagate-IronWolf-Internal-Hard-Drive/dp/B09NHV3CK9" target="_blank" rel="noopener">Amazon — IronWolf 4TB (~$190, precios 2025-26)</a>
+    <a href="https://www.reddit.com/r/DataHoarder/comments/1dungba/" target="_blank" rel="noopener">r/DataHoarder — subida de precios de discos 2025</a>
+    <a href="https://www.swolenerdproductions.com/post/davinci-resolve-monthly-subscription-the-new-30-option-what-it-means-and-who-should-use-it" target="_blank" rel="noopener">Alquiler de Studio ~$30/mes — análisis</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Documento generado como guía informativa · Los precios son en USD y de agosto 2026, sujetos a cambio · La opción NAS requiere conocimientos básicos de red (o ayuda para el montaje) · No afiliado con Blackmagic Design, Adobe, Hedge, Digital Rebellion ni LucidLink.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---- scrollspy ---- */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll("nav a.tab"));
+  var sections = tabs.map(function(t){ return document.querySelector(t.getAttribute("href")); });
+  if ("IntersectionObserver" in window) {
+    var spy = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) {
+          tabs.forEach(function(t){
+            t.classList.toggle("active", t.getAttribute("href") === "#" + e.target.id);
+          });
+        }
+      });
+    }, {rootMargin:"-40% 0px -55% 0px"});
+    sections.forEach(function(s){ if (s) spy.observe(s); });
+  }
+
+  /* ---- cost chart ---- */
+  var chart = document.getElementById("chart");
+  var btnBuy = document.getElementById("btn-buy");
+  var btnRent = document.getElementById("btn-rent");
+
+  var MONTHS = 36;
+  var W = 680, H = 300, PL = 52, PR = 14, PT = 24, PB = 34;
+  var MAX = 7000;
+
+  function series(mode){
+    /* cost at month t for each scenario; mode: buy|rent (Studio licensing) */
+    var nasBase = mode === "buy" ? 945 : 0;
+    var nasMonth = mode === "buy" ? 0 : 60;
+    var bmcBase = mode === "buy" ? 590 : 0;   /* 2x Studio */
+    var bmcMonth = 5 + (mode === "buy" ? 0 : 60);
+    return {
+      nas:   {c:"#ff5f2e", pts:pts(nasBase, nasMonth)},
+      bmc:   {c:"#4ade80", pts:pts(bmcBase, bmcMonth)},
+      lucid: {c:"#60a5fa", pts:pts(590, 160)},
+      frame: {c:"#c4b5fd", pts:pts(0, 30)}
+    };
+    function pts(base, month){ return d3(base, month); }
+    function d3(base, month){
+      var out = [];
+      for (var t = 0; t <= MONTHS; t += 1) out.push([t, base + month * t]);
+      return out;
+    }
+  }
+
+  function x(t){ return PL + (t / MONTHS) * (W - PL - PR); }
+  function y(v){ return H - PB - (v / MAX) * (H - PT - PB); }
+
+  function fmt(n){
+    if (n >= 1000) return "$" + (n / 1000).toFixed(1).replace(/\.0$/,"") + "k";
+    return "$" + n;
+  }
+
+  function draw(mode){
+    var s = series(mode);
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Coste acumulado a 36 meses">';
+    svg += '<line x1="' + PL + '" y1="' + (H-PB) + '" x2="' + (W-PR) + '" y2="' + (H-PB) + '" stroke="#26292f"/>';
+    svg += '<line x1="' + PL + '" y1="' + PT + '" x2="' + PL + '" y2="' + (H-PB) + '" stroke="#26292f"/>';
+    /* gridlines + y labels */
+    for (var g = 0; g <= MAX; g += 1000) {
+      var gy = y(g);
+      svg += '<line x1="' + PL + '" y1="' + gy + '" x2="' + (W-PR) + '" y2="' + gy + '" stroke="#1b1d22"/>';
+      svg += '<text x="' + (PL-8) + '" y="' + (gy+4) + '" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="#6b7280">' + fmt(g) + '</text>';
+    }
+    /* x labels */
+    [0,6,12,18,24,30,36].forEach(function(t){
+      svg += '<text x="' + x(t) + '" y="' + (H-PB+16) + '" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="#6b7280">' + t + 'm</text>';
+    });
+    /* series */
+    Object.keys(s).forEach(function(k){
+      var d = s[k].pts, path = "", lastY = null;
+      d.forEach(function(p, i){
+        var cx = x(p[0]), cy = y(p[1]);
+        path += (i === 0 ? "M" : "L") + cx.toFixed(1) + " " + cy.toFixed(1);
+        if (i === d.length - 1) lastY = cy;
+      });
+      var id = "g-" + k;
+      svg += '<path d="' + path + '" fill="none" stroke="' + s[k].c + '" stroke-width="2.5" stroke-linejoin="round"/>';
+      /* end dot + label (frame label below its dot to avoid overlap with NAS) */
+      var lp = d[d.length - 1];
+      var dy = k === "frame" ? 16 : -8;
+      svg += '<circle cx="' + x(lp[0]).toFixed(1) + '" cy="' + y(lp[1]).toFixed(1) + '" r="3.5" fill="' + s[k].c + '"/>';
+      svg += '<text x="' + (x(lp[0]) - 6) + '" y="' + (y(lp[1]) + dy) + '" text-anchor="end" font-family="ui-monospace,monospace" font-size="11.5" font-weight="700" fill="' + s[k].c + '">' + fmt(Math.round(lp[1])) + '</text>';
+    });
+    svg += '</svg>';
+    chart.innerHTML = svg;
+
+    /* update cumulative cards to match the selected Studio licensing mode */
+    var ends = {};
+    Object.keys(s).forEach(function(k){ ends[k] = Math.round(s[k].pts[MONTHS][1]); });
+    var fmtFull = function(n){ return "$" + n.toLocaleString("en-US"); };
+    var modeLbl = mode === "buy" ? "compra" : "alquiler";
+    document.getElementById("cum-nas").querySelector(".k").textContent = "NAS · 36 meses (" + modeLbl + " Studio)";
+    document.getElementById("cum-bmc").querySelector(".k").textContent = "Blackmagic Cloud · 36 meses (" + modeLbl + " Studio)";
+    document.getElementById("cum-nas").querySelector(".v").textContent = fmtFull(ends.nas);
+    document.getElementById("cum-bmc").querySelector(".v").textContent = fmtFull(ends.bmc);
+    document.getElementById("cum-lucid").querySelector(".v").textContent = fmtFull(ends.lucid);
+    document.getElementById("cum-frame").querySelector(".v").textContent = fmtFull(ends.frame);
+    var rt = {nas: ends.nas, lucid: ends.lucid}; /* BMC excluida: sus $5/mes no incluyen storage real para 2TB */
+    var best = Object.keys(rt).reduce(function(a,b){ return rt[a] <= rt[b] ? a : b; });
+    var worst = Object.keys(rt).reduce(function(a,b){ return rt[a] >= rt[b] ? a : b; });
+    ["nas","lucid"].forEach(function(k){
+      var el = document.getElementById("cum-" + k);
+      el.classList.toggle("win", k === best);
+      el.classList.toggle("lose", k === worst);
+    });
+  }
+
+  function setMode(mode){
+    btnBuy.classList.toggle("on", mode === "buy");
+    btnRent.classList.toggle("on", mode === "rent");
+    draw(mode);
+  }
+  btnBuy.addEventListener("click", function(){ setMode("buy"); });
+  btnRent.addEventListener("click", function(){ setMode("rent"); });
+  draw("buy");
+})();
+</script>
+
+</body>
+</html>
